@@ -90,4 +90,12 @@ public class ProcessTest {
             System.out.println("任务名称：" + historicTaskInstance.getName());
         }
     }
+
+    // 启动流程实例,添加businessKey
+    @Test
+    public void startUpProcessAddBusinessKey() {
+        String businessKey = "1";
+        ProcessInstance processInstance = runtimeService.startProcessInstanceByKey("qingjia", businessKey);
+        System.out.println("业务id:" + processInstance.getBusinessKey());
+    }
 }
