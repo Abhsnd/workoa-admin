@@ -6,6 +6,7 @@ import org.activiti.engine.RuntimeService;
 import org.activiti.engine.TaskService;
 import org.activiti.engine.history.HistoricTaskInstance;
 import org.activiti.engine.repository.Deployment;
+import org.activiti.engine.repository.ProcessDefinition;
 import org.activiti.engine.runtime.ProcessInstance;
 import org.activiti.engine.task.Task;
 import org.junit.jupiter.api.Test;
@@ -68,6 +69,11 @@ public class ProcessTest {
         }
     }
 
+    @Test
+    public void delete() {
+        runtimeService.deleteProcessInstance("66b8bcdd-fa1a-11ed-933b-0a0027000003", "null");
+    }
+
     // 处理当前任务
     @Test
     public void completeTask() {
@@ -98,4 +104,24 @@ public class ProcessTest {
         ProcessInstance processInstance = runtimeService.startProcessInstanceByKey("qingjia", businessKey);
         System.out.println("业务id:" + processInstance.getBusinessKey());
     }
+
+    // 全部实例挂起
+    @Test
+    public void suspendProcessInstanceAll() {
+        // 获取流程定义的对象
+        ProcessDefinition qingjia = repositoryService.createProcessDefinitionQuery()
+                .processDefinitionKey("qingjia")
+                .singleResult();
+        // 流程定义对象的状态
+        boolean suspended = qingjia.isSuspended();
+        // 如果被挂起则激活
+        if (suspended) {
+            repositoryService.activateProcessDefinitionById(qingjia.getId(), true, null);
+            System.out.println(qingjia.getId() + "激活了");
+        } else {    // 如果被激活则挂起
+            repositoryService.suspendProcessDefinitionById(qingjia.getId(), true, null);
+            System.out.println(qingjia.getId() + "挂起");
+        }
+    }
+
 }
