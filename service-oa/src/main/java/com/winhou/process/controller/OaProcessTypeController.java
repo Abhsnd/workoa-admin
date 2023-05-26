@@ -12,6 +12,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 /**
  * <p>
  * 审批类型 前端控制器
@@ -26,6 +28,13 @@ import org.springframework.web.bind.annotation.*;
 public class OaProcessTypeController {
     @Autowired
     private OaProcessTypeService oaProcessTypeService;
+
+    @ApiOperation(value = "获取全部审批分类")
+    @GetMapping("findAll")
+    public Result findAll() {
+        List<ProcessType> processTypeList = oaProcessTypeService.list();
+        return Result.ok(processTypeList);
+    }
 
     @PreAuthorize("hasAuthority('bnt.processType.list')")
     @ApiOperation(value = "获取分页列表")
