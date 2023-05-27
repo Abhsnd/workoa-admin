@@ -7,10 +7,12 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.winhou.model.process.ProcessTemplate;
 import com.winhou.model.process.ProcessType;
 import com.winhou.process.mapper.OaProcessTemplateMapper;
+import com.winhou.process.service.OaProcessService;
 import com.winhou.process.service.OaProcessTemplateService;
 import com.winhou.process.service.OaProcessTypeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.util.List;
 
@@ -27,6 +29,9 @@ public class OaProcessTemplateServiceImpl extends ServiceImpl<OaProcessTemplateM
 
     @Autowired
     private OaProcessTypeService oaProcessTypeService;
+
+    @Autowired
+    private OaProcessService oaProcessService;
 
     /**
      * @Author wiho
@@ -65,7 +70,10 @@ public class OaProcessTemplateServiceImpl extends ServiceImpl<OaProcessTemplateM
         processTemplate.setStatus(1);
         baseMapper.updateById(processTemplate);
 
-        // TODO 流程定义部署
+        // 流程定义部署
+        if (!StringUtils.isEmpty(processTemplate.getProcessDefinitionPath())) {
+            oaProcessService.deployZip(processTemplate.getProcessDefinitionPath());
+        }
 
     }
 }
