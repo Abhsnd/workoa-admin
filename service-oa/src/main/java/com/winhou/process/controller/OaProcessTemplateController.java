@@ -35,6 +35,15 @@ public class OaProcessTemplateController {
     @Autowired
     private OaProcessTemplateService oaProcessTemplateService;
 
+    // 部署流程定义文件 发布
+    @PreAuthorize("hasAuthority('bnt.processTemplate.publish')")
+    @ApiOperation(value = "发布")
+    @GetMapping("/publish/{id}")
+    public Result publish(@PathVariable Long id) {
+        oaProcessTemplateService.pushlish(id);
+        return Result.ok();
+    }
+
     @ApiOperation(value = "上传流程定义文件")
     @PostMapping("/uploadProcessDefinition")
     public Result uploadProcessDefinition(MultipartFile file) throws FileNotFoundException {
