@@ -3,8 +3,10 @@ package com.winhou.process.controller.api;
 import com.winhou.common.result.Result;
 import com.winhou.model.process.ProcessTemplate;
 import com.winhou.model.process.ProcessType;
+import com.winhou.process.service.OaProcessService;
 import com.winhou.process.service.OaProcessTemplateService;
 import com.winhou.process.service.OaProcessTypeService;
+import com.winhou.vo.process.ProcessFormVo;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +24,16 @@ public class ProcessController {
 
     @Autowired
     private OaProcessTemplateService oaProcessTemplateService;
+
+    @Autowired
+    private OaProcessService oaProcessService;
+
+    @ApiOperation(value = "启动流程")
+    @PostMapping("/startUp")
+    public Result start(@RequestBody ProcessFormVo processFormVo) {
+        oaProcessService.startUp(processFormVo);
+        return Result.ok();
+    }
 
     @ApiOperation(value = "获取审批模板")
     @GetMapping("getProcessTemplate/{processTemplateId}")

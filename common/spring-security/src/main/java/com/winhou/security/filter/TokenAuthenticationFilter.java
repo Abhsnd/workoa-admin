@@ -5,6 +5,7 @@ import com.winhou.common.jwt.JwtHelper;
 import com.winhou.common.result.Result;
 import com.winhou.common.result.ResultCodeEnum;
 import com.winhou.common.utils.ResponseUtil;
+import com.winhou.security.custom.LoginUserInfoHelper;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -58,6 +59,9 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
         if (!StringUtils.isEmpty(token)) {
             String username = JwtHelper.getUsername(token);
             if (!StringUtils.isEmpty(username)) {
+                // 通过ThreadLocal记录当前登录人信息
+                LoginUserInfoHelper.setUserId(JwtHelper.getUserId(token));
+                LoginUserInfoHelper.setUsername(username);
                 // 通过username从Redis中获取权限数据
                 String authString = (String) redisTemplate.opsForValue().get(username);
                 // 封装权限数据到集合

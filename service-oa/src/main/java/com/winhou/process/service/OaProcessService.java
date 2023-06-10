@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.winhou.model.process.Process;
+import com.winhou.vo.process.ProcessFormVo;
 import com.winhou.vo.process.ProcessQueryVo;
 import com.winhou.vo.process.ProcessVo;
 
@@ -22,4 +23,7 @@ public interface OaProcessService extends IService<Process> {
 
     // 部署流程定义
     void deployZip(String deployPath);
+
+    // 启动流程
+    void startUp(ProcessFormVo processFormVo);
 }
