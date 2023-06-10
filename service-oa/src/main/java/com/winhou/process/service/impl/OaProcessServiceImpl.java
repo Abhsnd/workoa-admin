@@ -2,11 +2,13 @@ package com.winhou.process.service.impl;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.winhou.auth.service.SysUserService;
 import com.winhou.model.process.Process;
+import com.winhou.model.process.ProcessRecord;
 import com.winhou.model.process.ProcessTemplate;
 import com.winhou.model.system.SysUser;
 import com.winhou.process.mapper.OaProcessMapper;
@@ -23,6 +25,7 @@ import org.activiti.engine.TaskService;
 import org.activiti.engine.repository.Deployment;
 import org.activiti.engine.runtime.ProcessInstance;
 import org.activiti.engine.task.Task;
+import org.activiti.engine.task.TaskQuery;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,7 +47,7 @@ import java.util.zip.ZipInputStream;
  * @since 2023-05-27
  */
 @Service
-public class OaProcessServiceImpl extends ServiceImpl<OaProcessMapper, Process> implements OaProcessService {
+public class  OaProcessServiceImpl extends ServiceImpl<OaProcessMapper, Process> implements OaProcessService {
 
     @Autowired
     private RepositoryService repositoryService;
@@ -139,6 +142,84 @@ public class OaProcessServiceImpl extends ServiceImpl<OaProcessMapper, Process> 
 
         // 记录操作审批信息记录
         oaProcessRecordService.record(process.getId(), 1, "发起申请");
+    }
+
+    // 查询待处理任务列表
+    @Override
+    public IPage<ProcessVo> findPending(Page<Process> pageParam) {
+        // 封装查询条件，根据当前登录用户名称
+        TaskQuery query = taskService.createTaskQuery()
+                .taskAssignee(LoginUserInfoHelper.getUsername())
+                .orderByTaskCreateTime()
+                .desc();
+        // 调用分页条件查询，代办任务集合
+        int begin = (int) ((pageParam.getCurrent() - 1) * pageParam.getSize());
+        int size = (int) pageParam.getSize();
+        List<Task> taskList = query.listPage(begin, size);
+        // 总记录数
+        long totalCount = query.count();
+        // 封装taskList到List<ProcessVo>
+        List<ProcessVo> processVoList = new ArrayList<>();
+        for (Task task : taskList) {
+            // 获取流程实例id
+            String processInstanceId = task.getProcessInstanceId();
+            // 获取实例对象
+            ProcessInstance processInstance = runtimeService.createProcessInstanceQuery()
+                    .processInstanceId(processInstanceId)
+                    .singleResult();
+            // 获取业务key - processId
+            String businessKey = processInstance.getBusinessKey();
+            if (businessKey == null) {
+                continue;
+            }
+            // 根据业务key获取Process对象
+            long processId = Long.parseLong(businessKey);
+            Process process = baseMapper.selectById(processId);
+            // 复制Process到ProcessVo
+            ProcessVo processVo = new ProcessVo();
+            BeanUtils.copyProperties(process, processVo);
+            processVo.setTaskId(task.getId());
+
+            processVoList.add(processVo);
+        }
+        // 封装到IPage
+        IPage<ProcessVo> page = new Page<ProcessVo>(
+                pageParam.getCurrent(),
+                pageParam.getSize(),
+                totalCount
+        );
+        page.setRecords(processVoList);
+        return page;
+    }
+
+    // 查看审批详情信息
+    @Override
+    public Map<String, Object> show(Long id) {
+        // 根据流程id获取流程信息
+        Process process = baseMapper.selectById(id);
+        // 根据流程id获取流程记录
+        LambdaQueryWrapper<ProcessRecord> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(ProcessRecord::getProcessId, id);
+        List<ProcessRecord> processRecordList = oaProcessRecordService.list(wrapper);
+        // 根据模板id获取审批模板
+        ProcessTemplate processTemplate = oaProcessTemplateService.getById(process.getProcessTemplateId());
+        // 判断当前用户是否可以审批
+        boolean isApprove = false;
+        String processInstanceId = process.getProcessInstanceId();
+        List<Task> taskList = this.getCurrentTaskList(processInstanceId);
+        for (Task task : taskList) {
+            String username = LoginUserInfoHelper.getUsername();
+            if (task.getAssignee().equals(username)) {
+                isApprove = true;
+            }
+        }
+        // 封装到map
+        Map<String, Object> map = new HashMap<>();
+        map.put("process", process);
+        map.put("processRecordList", processRecordList);
+        map.put("processTemplate", processTemplate);
+        map.put("isApprove", isApprove);
+        return map;
     }
 
     // 当前业务列表

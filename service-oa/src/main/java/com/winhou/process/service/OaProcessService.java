@@ -8,6 +8,8 @@ import com.winhou.vo.process.ProcessFormVo;
 import com.winhou.vo.process.ProcessQueryVo;
 import com.winhou.vo.process.ProcessVo;
 
+import java.util.Map;
+
 /**
  * <p>
  * 审批类型 服务类
@@ -26,4 +28,10 @@ public interface OaProcessService extends IService<Process> {
 
     // 启动流程
     void startUp(ProcessFormVo processFormVo);
+
+    // 查询待处理任务列表
+    IPage<ProcessVo> findPending(Page<Process> pageParam);
+
+    // 查看审批详情信息
+    Map<String, Object> show(Long id);
 }

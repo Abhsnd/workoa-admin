@@ -1,18 +1,24 @@
 package com.winhou.process.controller.api;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.winhou.common.result.Result;
+import com.winhou.model.process.Process;
 import com.winhou.model.process.ProcessTemplate;
 import com.winhou.model.process.ProcessType;
 import com.winhou.process.service.OaProcessService;
 import com.winhou.process.service.OaProcessTemplateService;
 import com.winhou.process.service.OaProcessTypeService;
 import com.winhou.vo.process.ProcessFormVo;
+import com.winhou.vo.process.ProcessVo;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @Api(tags = "审批流管理")
 @RestController
@@ -27,6 +33,25 @@ public class ProcessController {
 
     @Autowired
     private OaProcessService oaProcessService;
+
+    @ApiOperation(value = "获取审批详情")
+    @GetMapping("show/{id}")
+    public Result show(@PathVariable Long id) {
+        Map<String, Object> map = oaProcessService.show(id);
+        return Result.ok(map);
+    }
+
+    @ApiOperation(value = "待处理")
+    @GetMapping("/findPending/{page}/{limit}")
+    public Result findPending(
+            @ApiParam(name = "page", value = "当前页码", required = true)
+            @PathVariable Long page,
+            @ApiParam(name = "limit", value = "每页记录数", required = true)
+            @PathVariable Long limit) {
+        Page<Process> pageParam = new Page<>(page, limit);
+        IPage<ProcessVo> pageModel = oaProcessService.findPending(pageParam);
+        return Result.ok(pageModel);
+    }
 
     @ApiOperation(value = "启动流程")
     @PostMapping("/startUp")
