@@ -9,6 +9,7 @@ import com.winhou.model.process.ProcessType;
 import com.winhou.process.service.OaProcessService;
 import com.winhou.process.service.OaProcessTemplateService;
 import com.winhou.process.service.OaProcessTypeService;
+import com.winhou.vo.process.ApprovalVo;
 import com.winhou.vo.process.ProcessFormVo;
 import com.winhou.vo.process.ProcessVo;
 import io.swagger.annotations.Api;
@@ -33,6 +34,37 @@ public class ProcessController {
 
     @Autowired
     private OaProcessService oaProcessService;
+
+    @ApiOperation(value = "已发起")
+    @GetMapping("/findStarted/{page}/{limit}")
+    public Result findStarted(
+            @ApiParam(name = "page", value = "当前页码", required = true)
+            @PathVariable Long page,
+            @ApiParam(name = "limit", value = "每页记录数", required = true)
+            @PathVariable Long limit) {
+        Page<ProcessVo> pageParam = new Page<>(page, limit);
+        IPage<ProcessVo> pageModel = oaProcessService.findStarted(pageParam);
+        return Result.ok(pageModel);
+    }
+
+    @ApiOperation(value = "已处理")
+    @GetMapping("/findProcessed/{page}/{limit}")
+    public Result findProcessed(
+            @ApiParam(name = "page", value = "当前页码", required = true)
+            @PathVariable Long page,
+            @ApiParam(name = "limit", value = "每页记录数", required = true)
+            @PathVariable Long limit) {
+        Page<Process> pageParam = new Page<>(page, limit);
+        IPage<ProcessVo> pageModel = oaProcessService.findProcessed(pageParam);
+        return Result.ok(pageModel);
+    }
+
+    @ApiOperation(value = "审批")
+    @PostMapping("approve")
+    public Result approve(@RequestBody ApprovalVo approvalVo) {
+        oaProcessService.approve(approvalVo);
+        return Result.ok();
+    }
 
     @ApiOperation(value = "获取审批详情")
     @GetMapping("show/{id}")

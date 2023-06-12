@@ -15,6 +15,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
 /**
  * <p>
  * 用户表 前端控制器
@@ -29,6 +31,14 @@ import org.springframework.web.bind.annotation.*;
 public class SysUserController {
     @Autowired
     private SysUserService sysUserService;
+
+    @ApiOperation(value = "获取当前用户基本信息")
+    @GetMapping("getCurrentUser")
+    @CrossOrigin
+    public Result getCurrentUser() {
+        Map<String, Object> map = sysUserService.getCurrentUser();
+        return Result.ok(map);
+    }
 
     // 用户条件分页查询
     @ApiOperation("用户条件分页查询")

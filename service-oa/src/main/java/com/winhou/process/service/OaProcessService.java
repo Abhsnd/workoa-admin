@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.winhou.model.process.Process;
+import com.winhou.vo.process.ApprovalVo;
 import com.winhou.vo.process.ProcessFormVo;
 import com.winhou.vo.process.ProcessQueryVo;
 import com.winhou.vo.process.ProcessVo;
@@ -34,4 +35,13 @@ public interface OaProcessService extends IService<Process> {
 
     // 查看审批详情信息
     Map<String, Object> show(Long id);
+
+    // 审批
+    void approve(ApprovalVo approvalVo);
+
+    // 已处理
+    IPage<ProcessVo> findProcessed(Page<Process> pageParam);
+
+    // 已发起
+    IPage<ProcessVo> findStarted(Page<ProcessVo> pageParam);
 }

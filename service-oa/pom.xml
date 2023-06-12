@@ -51,6 +51,13 @@
             <version>2.0</version>
         </dependency>
 
+        <!-- 微信开发工具类 -->
+        <dependency>
+            <groupId>com.github.binarywang</groupId>
+            <artifactId>weixin-java-mp</artifactId>
+            <version>4.1.0</version>
+        </dependency>
+
         <!--引入activiti的springboot启动器 -->
         <dependency>
             <groupId>org.activiti</groupId>

@@ -5,7 +5,11 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.winhou.auth.mapper.SysUserMapper;
 import com.winhou.auth.service.SysUserService;
 import com.winhou.model.system.SysUser;
+import com.winhou.security.custom.LoginUserInfoHelper;
 import org.springframework.stereotype.Service;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * <p>
@@ -43,5 +47,15 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
         wrapper.eq(SysUser::getUsername, username);
         SysUser sysUser = baseMapper.selectOne(wrapper);
         return sysUser;
+    }
+
+    // 获取当前用户基本信息
+    @Override
+    public Map<String, Object> getCurrentUser() {
+        SysUser sysUser = baseMapper.selectById(LoginUserInfoHelper.getUserId());
+        Map<String, Object> map = new HashMap<>();
+        map.put("name", sysUser.getName());
+        map.put("phone", sysUser.getPhone());
+        return map;
     }
 }
