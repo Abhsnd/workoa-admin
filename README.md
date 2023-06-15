@@ -1,6 +1,6 @@
 # OA办公系统-Web管理端
 
-这是基于SpringBoot的智能OA办公系统，通过微信公众号实现OA管理流程
+这是基于 SpringBoot + Vue 的前后端分离的智能OA办公系统，管理员通过管理页面进行后台管理，管理员有多种角色，不同的角色拥有不同的权限，员工通过微信公众号实现OA管理流程
 
 项目包括管理端和员工端
 
@@ -14,7 +14,7 @@
 | ---------- | -------------------------------------------- |
 | 数据缓存   | Redis                                        |
 | 数据库     | MyBatis-Plus + MySQL                         |
-| 权限控制   | Spring Security                              |
+| 权限控制   | Spring Security + JWT                        |
 | 工作流引擎 | Activiti7                                    |
 | 管理端前端 | Vue + ElementUI + Axios + Node.js + Npm      |
 | 前端框架   | vue-admin-template                           |
