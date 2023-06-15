@@ -20,6 +20,7 @@ import com.winhou.vo.process.ApprovalVo;
 import com.winhou.vo.process.ProcessFormVo;
 import com.winhou.vo.process.ProcessQueryVo;
 import com.winhou.vo.process.ProcessVo;
+import com.winhou.wechat.service.MessageService;
 import org.activiti.bpmn.model.BpmnModel;
 import org.activiti.bpmn.model.EndEvent;
 import org.activiti.bpmn.model.FlowNode;
@@ -80,6 +81,9 @@ public class  OaProcessServiceImpl extends ServiceImpl<OaProcessMapper, Process>
 
     @Autowired
     private HistoryService historyService;
+
+    @Autowired
+    private MessageService messageService;
 
     // 审批管理列表
     @Override
@@ -146,7 +150,8 @@ public class  OaProcessServiceImpl extends ServiceImpl<OaProcessMapper, Process>
             String name = user.getName();
             nameList.add(name);
 
-            // TODO 推送信息
+            // 公众号推送信息
+            messageService.pushPendingMessage(process.getId(), user.getId(), task.getId());
         }
         // 业务和流程关联
         process.setProcessInstanceId(processInstance.getId());
@@ -270,7 +275,8 @@ public class  OaProcessServiceImpl extends ServiceImpl<OaProcessMapper, Process>
                 String assignee = task.getAssignee();
                 SysUser sysUser = sysUserService.getUserByUserName(assignee);
                 assignList.add(sysUser.getName());
-                // TODO 公众号信息推送
+                // 推送消息给下一个审批人
+                messageService.pushPendingMessage(process.getId(), sysUser.getId(), task.getId());
             }
             process.setDescription("等待" + StringUtils.join(assignList.toArray(), ",") + "审批");
             process.setStatus(1);
@@ -283,6 +289,8 @@ public class  OaProcessServiceImpl extends ServiceImpl<OaProcessMapper, Process>
                 process.setStatus(-1);
             }
         }
+        //推送消息给申请人
+        messageService.pushProcessedMessage(process.getId(), process.getUserId(), approvalVo.getStatus());
         baseMapper.updateById(process);
     }
 
@@ -354,7 +362,7 @@ public class  OaProcessServiceImpl extends ServiceImpl<OaProcessMapper, Process>
         }
         FlowNode endFlowNode = (FlowNode) endEventList.get(0);
         // 获取当前流向节点
-        FlowNode currentFlowNode = (FlowNode) bpmnModel.getMainProcess().getFlowElement(task.getProcessDefinitionId());
+        FlowNode currentFlowNode = (FlowNode) bpmnModel.getMainProcess().getFlowElement(task.getTaskDefinitionKey());
         // 临时保存当前活动的原始方向
         List originalSequenceFlowList = new ArrayList<>();
         originalSequenceFlowList.addAll(currentFlowNode.getOutgoingFlows());
