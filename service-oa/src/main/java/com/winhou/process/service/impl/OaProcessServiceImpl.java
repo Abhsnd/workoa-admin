@@ -37,6 +37,8 @@ import org.activiti.engine.task.TaskQuery;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
@@ -189,10 +191,12 @@ public class  OaProcessServiceImpl extends ServiceImpl<OaProcessMapper, Process>
             Process process = baseMapper.selectById(processId);
             // 复制Process到ProcessVo
             ProcessVo processVo = new ProcessVo();
-            BeanUtils.copyProperties(process, processVo);
-            processVo.setTaskId(task.getId());
+            if (process != null) {
+                BeanUtils.copyProperties(process, processVo);
+                processVo.setTaskId(task.getId());
 
-            processVoList.add(processVo);
+                processVoList.add(processVo);
+            }
         }
         // 封装到IPage
         IPage<ProcessVo> page = new Page<ProcessVo>(
@@ -285,6 +289,10 @@ public class  OaProcessServiceImpl extends ServiceImpl<OaProcessMapper, Process>
     // 已处理
     @Override
     public IPage<ProcessVo> findProcessed(Page<Process> pageParam) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = (String) authentication.getPrincipal();
+        System.out.println("username = " + username);
+
         // 封装查询条件
         HistoricTaskInstanceQuery query = historyService.createHistoricTaskInstanceQuery()
                 .taskAssignee(LoginUserInfoHelper.getUsername())
@@ -307,11 +315,14 @@ public class  OaProcessServiceImpl extends ServiceImpl<OaProcessMapper, Process>
             LambdaQueryWrapper<Process> wrapper = new LambdaQueryWrapper<>();
             wrapper.eq(Process::getProcessInstanceId, processInstanceId);
             Process process = baseMapper.selectOne(wrapper);
+            System.out.println("process = " + process);
+
             // process -> processVo
             ProcessVo processVo = new ProcessVo();
-            BeanUtils.copyProperties(process, processVo);
-
-            processVoList.add(processVo);
+            if (process != null) {
+                BeanUtils.copyProperties(process, processVo);
+                processVoList.add(processVo);
+            }
         }
 
         // 封装到IPage
