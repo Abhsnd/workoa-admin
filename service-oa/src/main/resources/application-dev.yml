@@ -1,5 +1,5 @@
 server:
-  port: 8800
+  port: 8201
 
 mybatis-plus:
   configuration:
@@ -43,3 +43,9 @@ spring:
     history-level: full
     #校验流程文件，默认校验resources下的process 文件夹的流程文件
     check-process-definitions: true
+
+wechat:
+  mpAppId: wx92112a15247b9c2c
+  mpAppSecret: 004400212472ff2f71283a27dbb4bf0e
+  # 授权回调获取用户信息接口地址
+  userInfoUrl: http://ggkt2.vipgz1.91tunnel.com/admin/wechat/userInfo
